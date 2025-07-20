@@ -11,6 +11,15 @@ const tabs = document.querySelectorAll('.operations__tab');
 const tabsContainer = document.querySelector('.operations__tab-container');
 const tabsContent = document.querySelectorAll('.operations__content');
 
+// logo
+const logoLink = document.querySelector('.nav__logo');
+logoLink.addEventListener('click', () => {
+  window.scrollTo({
+    top: 0,
+    behavior: 'smooth',
+  });
+});
+
 ///////////////////////////////////////
 // Modal window
 const openModal = function () {
@@ -142,12 +151,12 @@ headerObserver.observe(header);
 // Reveal sections
 const allSections = document.querySelectorAll('.section');
 const revealSection = function (entries, observer) {
-  const [entry] = entries;
+  entries.forEach(entry => {
+    if (!entry.isIntersecting) return;
 
-  if (!entry.isIntersecting) return;
-
-  entry.target.classList.remove('section--hidden');
-  observer.unobserve(entry.target);
+    entry.target.classList.remove('section--hidden');
+    observer.unobserve(entry.target);
+  });
 };
 const sectionObserver = new IntersectionObserver(revealSection, {
   root: null,
@@ -157,3 +166,30 @@ allSections.forEach(function (section) {
   sectionObserver.observe(section);
   section.classList.add('section--hidden');
 });
+
+// Lazy Loading images
+const imgTargets = document.querySelectorAll('img[data-src]');
+
+const loadImg = (entries, observer) => {
+  const [entry] = entries;
+  console.log(entry);
+
+  // Guard clause
+  if (!entry.isIntersecting) return;
+
+  // Replace src with data-src
+  entry.target.src = entry.target.dataset.src;
+
+  entry.target.addEventListener('load', () => {
+    entry.target.classList.remove('lazy-img');
+  });
+  observer.unobserve(entry.target);
+};
+
+const imgObserver = new IntersectionObserver(loadImg, {
+  root: null,
+  threshold: 0,
+  rootMargin: '-20px',
+});
+
+imgTargets.forEach(img => imgObserver.observe(img));
